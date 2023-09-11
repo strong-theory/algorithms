@@ -2,7 +2,9 @@
 
 Implementação do algoritmo de dijkstra para encontrar o menor caminho.
 
-## Executar local
+## Executar local java
+
+1. `cd java`
 
 1. Build do projeto:
     ```sh

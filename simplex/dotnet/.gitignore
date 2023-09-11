@@ -1,0 +1,13 @@
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.resx
+.vs/
+
+bin/
+obj/
+Properties/
+
+App.config
