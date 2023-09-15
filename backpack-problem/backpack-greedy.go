@@ -17,8 +17,7 @@ func mostExpensiveItem(items *[]Item, maxWeight float32) *Item {
 	var returned *Item
 
 	for i := 0; i < len(*items); i++ {
-		var currentItem *Item
-		currentItem = &(*items)[i]
+		currentItem := &(*items)[i]
 		if currentItem.weight <= maxWeight && !currentItem.processed && price < currentItem.price {
 			price = currentItem.price
 			returned = currentItem
