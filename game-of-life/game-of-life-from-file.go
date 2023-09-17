@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
+	"os"
+	"strings"
 	"time"
 )
 
@@ -63,24 +64,33 @@ func countNeighbours(board [WIDTH][HEIGHT]int, i int, j int) int {
 	return total
 }
 
-func initRandomBoard() [WIDTH][HEIGHT]int {
-	var board [WIDTH][HEIGHT]int
-	for i := 0; i < WIDTH; i++ {
-		for j := 0; j < HEIGHT; j++ {
-			board[i][j] = rand.Intn(2)
-		}
+func check(e error) {
+	if e != nil {
+		panic(e)
 	}
-	return board
 }
 
-func initWithOscilator() [WIDTH][HEIGHT]int {
-	board := [WIDTH][HEIGHT]int{
-		{0, 0, 0, 0, 0},
-		{0, 0, 1, 0, 0},
-		{0, 0, 1, 0, 0},
-		{0, 0, 1, 0, 0},
-		{0, 0, 0, 0, 0},
+func initFromFile(fileName string) [WIDTH][HEIGHT]int {
+	var board [WIDTH][HEIGHT]int
+
+	dat, err := os.ReadFile(fileName)
+	check(err)
+
+	data := string(dat)
+
+	lines := strings.Split(data, "\n")
+
+	for l := 0; l < len(lines); l++ {
+
+		for c := 0; c < len(lines[l]); c++ {
+			if lines[l][c] == 'X' {
+				board[l][c] = 1
+			} else {
+				board[l][c] = 0
+			}
+		}
 	}
+
 	return board
 }
 
@@ -92,14 +102,13 @@ func main() {
 	clear()
 	fmt.Println("**** Game of Life ****")
 
-	board := initRandomBoard()
+	board := initFromFile("pattern01.txt")
 
 	printBoard(board)
 
 	nextRodada := '\n'
 	round := 0
 	for nextRodada == '\n' || nextRodada == '\r' {
-
 		board = nextRound(board)
 
 		clear()
