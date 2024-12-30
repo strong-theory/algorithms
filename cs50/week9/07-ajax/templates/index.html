@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" charset="UTF-8" content="initial-scale=1, width=device-width">
+    <title>Movie Search</title>
+</head>
+<body>
+    <input autocomplete="off" autofocus placeholder="Query" type="search">
+    <ul></ul>
+    <script>
+        let input = document.querySelector('input');
+        input.addEventListener('input', async function() {
+            const response = await fetch('/search?q=' + input.value);
+            const shows = await response.json();
+            const ul = document.querySelector('ul');
+            ul.innerHTML = '';
+            for (let show of shows) {
+                const li = document.createElement('li');
+                li.innerHTML = show["title"];
+                ul.appendChild(li);
+            }
+        });
+    </script>
+</body>
+</html>

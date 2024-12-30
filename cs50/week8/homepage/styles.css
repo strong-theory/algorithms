@@ -1,0 +1,27 @@
+#my-title {
+    background-color: lightblue;
+    text-align: center;
+}
+
+.my-input-field {
+    margin-top: 10px;
+    vertical-align: middle;
+}
+
+h3 {
+    text-align: center;
+    color: blueviolet;
+}
+
+form {
+    border-radius: 1ch;
+    border: 1ch;
+    background-color: lightblue;
+}
+
+table {
+    margin-left: auto;
+    margin-right: auto;
+    border-collapse: collapse;
+    width: 100%;
+}

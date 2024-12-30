@@ -45,8 +45,18 @@
                 <label class="form-label">Creation Date</label>
                 <input type="text" class="form-control" th:value="${document.creationDate}" readonly>
             </div>
-            <h5>Additional Information</h5>
-            <!-- Additional details could go here if needed -->
+            <div class="mb-3">
+                <label class="form-label">Invoice Number</label>
+                <input type="text" class="form-control" th:value="${document.invoiceNumber}" readonly>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Invoice Date</label>
+                <input type="text" class="form-control" th:value="${document.invoiceDate}" readonly>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Total</label>
+                <input type="text" class="form-control" th:value="${document.total}" readonly>
+            </div>
         </div>
     </div>
 </div>

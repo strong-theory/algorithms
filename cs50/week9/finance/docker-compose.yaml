@@ -1,0 +1,10 @@
+version: '3.8'
+
+services:
+  sqlite:
+    image: nouchka/sqlite3:latest
+    container_name: sqlite-container
+    working_dir: /data
+    volumes:
+      - ./birthdays.db:/data/finance.db
+    entrypoint: ["tail", "-f", "/dev/null"]
