@@ -62,15 +62,15 @@ def main():
     load_data(directory)
     print("Data loaded.")
 
-    # source = person_id_for_name(input("Name: "))
-    # if source is None:
-    #     sys.exit("Person not found.")
-    # target = person_id_for_name(input("Name: "))
-    # if target is None:
-    #     sys.exit("Person not found.")
-    #
-    source = '129'
-    target = '158'
+    source = person_id_for_name(input("Name: "))
+    if source is None:
+        sys.exit("Person not found.")
+    target = person_id_for_name(input("Name: "))
+    if target is None:
+        sys.exit("Person not found.")
+
+    # source = '129'
+    # target = '158'
     path = shortest_path(source, target)
 
     if path is None:
@@ -93,16 +93,14 @@ def shortest_path(source, target):
 
     If no possible path, returns None.
     """
-    root = solve_with_bfs(source, target)
 
-    return root
+    return solve(source, target)
 
-def solve_with_bfs(source, target):
+def solve(source, target):
 
     source_person = people[str(source)]
     state = {'id': source, 'name': source_person['name']}
     start = Node(state = state, parent=None, action=None)
-
 
     frontier = StackFrontier()
     frontier.add(start)
@@ -114,7 +112,6 @@ def solve_with_bfs(source, target):
             return None
         
         node = frontier.remove()
-        print(f"Node {node}")
 
         if node.state['id'] == str(target):
             solution = []
@@ -128,20 +125,34 @@ def solve_with_bfs(source, target):
         
         explored.add(str(node.state['id']))
 
-        for movie_id, person_id in neighbors_for_person(str(node.state['id'])):
-            if person_id in explored:
-                continue
+        neighbors = neighbors_for_person(str(node.state['id']))
 
-            state = {'id': person_id, 'movie_id': movie_id, 'name': people[person_id]['name']}
+        is_target = is_target_into_neighbors(target, neighbors, node)
+        if is_target is not None:
+            frontier.add(is_target)
+        else:
+            for movie_id, person_id in neighbors:
+                if person_id in explored:
+                    continue
 
-            child = Node(state=state, parent=node, action=Node)
+                state = {'id': person_id, 'movie_id': movie_id, 'name': people[person_id]['name']}
 
-            if frontier.contains_state(child):
-                continue
+                child = Node(state=state, parent=node, action=Node)
 
-            frontier.add(child)
-            movie = movies[movie_id]['title']
-            print(f"A pessoa {state} também está no filme {movie}")
+                if frontier.contains_state(child):
+                    continue
+
+                frontier.add(child)
+
+def is_target_into_neighbors(target, neighbors, node):
+    for parent_movie_id, parent_id in neighbors:
+        for movie_id, person_id in neighbors_for_person(parent_id):
+            if person_id == target:
+                parent_state = {'id': parent_id, 'movie_id': parent_movie_id, 'name': people[parent_id]['name']}
+                parent = Node(state=parent_state, parent=node, action=Node)
+                state = {'id': person_id, 'movie_id': movie_id, 'name': people[person_id]['name']}
+                return Node(state=state, parent=parent, action=Node)
+    return None
 
 
 def person_id_for_name(name):
