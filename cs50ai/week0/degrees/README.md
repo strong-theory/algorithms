@@ -1,3 +1,7 @@
+## Degrees
+
+[Problem](https://cs50.harvard.edu/ai/2024/projects/0/degrees/)
+
 ```sh
 style50 degrees.py
 ```
