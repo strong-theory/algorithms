@@ -24,7 +24,7 @@ def player(board):
     total_x = 0
     total_y = 0
     for i in range(0, 3):
-        for j in range(0,3):
+        for j in range(0, 3):
             if board[i][j] == X:
                 total_x = total_x + 1
             elif board[i][j] == O:
@@ -39,11 +39,11 @@ def actions(board):
     """
     Returns set of all possible actions (i, j) available on the board.
     """
-    result_actions = []
+    result_actions = set()
     for i in range(0, 3):
         for j in range(0, 3):
             if board[i][j] is EMPTY:
-                result_actions.append((i, j))
+                result_actions.add((i, j))
     return result_actions
 
 
@@ -100,7 +100,7 @@ def terminal(board):
     
     for i in range(0, 3):
         col = [board[0][i], board[1][i], board[2][i]]
-        if (are_all_the_same_value(col)):
+        if are_all_the_same_value(col):
             return True
 
     return False
@@ -129,12 +129,17 @@ def utility(board):
     
     return 0
 
+
 def define_x_or_o(value):
+    """
+    Returns 1 if value is X, -1 if is O, 0 otherwise.
+    """
     if value == X:
         return 1
     if value == O:
         return -1
     return 0
+
 
 def minimax(board):
     """
@@ -152,12 +157,16 @@ def minimax(board):
         (next_action, value) = min_value(board)
         return next_action
 
+
 def max_value(board):
+    """
+    Função para maximizar
+    """
     if terminal(board):
         return float('-inf'), utility(board)
 
     future_actions = actions(board)
-    result_action = future_actions[0]
+    result_action = None
     value = float('-inf')
     for action in future_actions:
 
@@ -169,11 +178,14 @@ def max_value(board):
 
 
 def min_value(board):
+    """
+    Função para minimizar
+    """
     if terminal(board):
         return float('inf'), utility(board)
 
     future_actions = actions(board)
-    result_action = future_actions[0]
+    result_action = None
 
     value = float('inf')
     for action in future_actions:
@@ -186,13 +198,20 @@ def min_value(board):
 
 
 def all_cells_filled(board):
+    """
+    Verifica se todas as celulas estao preenchidas
+    """
     for i in range(0, 3):
         for j in range(0, 3):
             if board[i][j] == EMPTY:
                 return False
     return True
 
+
 def are_all_the_same_value(row):
+    """
+    verifica se a row possui apenas valores iguais
+    """
     first = row[0]
     if first == EMPTY:
         return False
