@@ -151,10 +151,10 @@ def minimax(board):
     next_player = player(board)
 
     if next_player == X:
-        (next_action, value) = max_value(board)
+        (next_action, _) = max_value(board)
         return next_action
     else:
-        (next_action, value) = min_value(board)
+        (next_action, _) = min_value(board)
         return next_action
 
 
