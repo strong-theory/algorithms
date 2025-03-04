@@ -189,25 +189,27 @@ class MinesweeperAI():
 
     def create_sentence(self, cell, count):
         vizinhos = set()
-
+        known_mines_count = 0
         for i in range(-1, 2):
             for j in range(-1, 2):
                 if i == 0 and j == 0:
                     continue
                 vizinho_x = cell[0] + i
                 vizinho_y = cell[1] + j
-
-                if vizinho_x < 0 or vizinho_x > (self.width - 1):
+                if vizinho_x < 0 or vizinho_x >= self.height:
                     continue
-                if vizinho_y < 0 or vizinho_y > (self.height - 1):
+                if vizinho_y < 0 or vizinho_y >= self.width:
                     continue
 
                 vizinho = (vizinho_x, vizinho_y)
-                if vizinho not in self.mines and vizinho not in self.safes:
+                if vizinho in self.mines:
+                    known_mines_count += 1
+                elif vizinho not in self.safes and vizinho not in self.moves_made:
                     vizinhos.add(vizinho)
 
-        if len(vizinhos) > 0:
-            return Sentence(vizinhos, count)
+        adjusted_count = count - known_mines_count
+        if len(vizinhos) > 0 and adjusted_count >= 0:
+            return Sentence(vizinhos, adjusted_count)
 
         return None
 
