@@ -107,15 +107,17 @@ class Sentence():
         """
         Returns the set of all cells in self.cells known to be mines.
         """
-        return self.mines.copy()
-
+        if len(self.cells) == self.count:
+            return self.cells.copy()
+        return set()
 
     def known_safes(self):
         """
         Returns the set of all cells in self.cells known to be safe.
         """
-        return self.safes.copy()
-
+        if self.count == 0:
+            return self.cells.copy()
+        return set()
 
     def mark_mine(self, cell):
         """
@@ -124,7 +126,7 @@ class Sentence():
         """
         if cell in self.cells:
             self.cells.remove(cell)
-            #self.count -= 1
+            self.count -= 1
             self.mines.add(cell)
 
     def mark_safe(self, cell):
@@ -134,8 +136,10 @@ class Sentence():
         """
         if cell in self.cells:
             self.cells.remove(cell)
-            #self.count -= 1
             self.safes.add(cell)
+
+        if cell in self.mines:
+            self.mines.remove(cell)
 
 
 class MinesweeperAI():
@@ -177,6 +181,12 @@ class MinesweeperAI():
         for sentence in self.knowledge:
             sentence.mark_safe(cell)
 
+        if cell in self.mines:
+            self.mines.remove(cell)
+
+    # 3) add a new sentence to the AI's knowledge base
+    #    based on the value of `cell` and `count`
+
     def create_sentence(self, cell, count):
         vizinhos = set()
 
@@ -192,11 +202,59 @@ class MinesweeperAI():
                 if vizinho_y < 0 or vizinho_y > (self.height - 1):
                     continue
 
-                if  (vizinho_x, vizinho_y) not in self.moves_made and (vizinho_x, vizinho_y) not in self.safes and (vizinho_x, vizinho_y) not in self.mines:
-                    vizinhos.add((vizinho_x, vizinho_y))
+                vizinho = (vizinho_x, vizinho_y)
+                if vizinho not in self.mines and vizinho not in self.safes:
+                    vizinhos.add(vizinho)
+
         if len(vizinhos) > 0:
-            sentence = Sentence(vizinhos, count)
-            self.knowledge.append(sentence)
+            return Sentence(vizinhos, count)
+
+        return None
+
+    # If a sentence has no cells, remove it from knowledge
+    def check_empty_cells(self):
+        self.knowledge = [sentence for sentence in self.knowledge if len(sentence.cells) > 0]
+
+    # 4) mark any additional cells as safe or as mines
+    #    if it can be concluded based on the AI's knowledge base
+
+    def update_knowledge(self):
+
+        for sentence in self.knowledge:
+            for cell in sentence.known_mines():
+                if cell not in self.safes:
+                    self.mark_mine(cell)
+            for cell in sentence.known_safes():
+                self.mark_safe(cell)
+
+        for sentence in self.knowledge:
+            if sentence.count == 0:
+                for c in sentence.cells.copy():
+                    self.mark_safe(c)
+
+        for sentence in self.knowledge:
+            if sentence.count == len(sentence.cells):
+                for c in sentence.cells.copy():
+                    if c not in self.safes:
+                        self.mark_mine(c)
+
+        self.check_empty_cells()
+
+    # 5) add any new sentences to the AI's knowledge base
+    #   if they can be inferred from existing knowledge
+    def infer_new_sentence(self):
+        for sentence in self.knowledge:
+            for sentence2 in self.knowledge:
+                if sentence == sentence2:
+                    continue
+
+                if sentence2.cells.issubset(sentence.cells):
+                    sentence.cells -= sentence2.cells
+                    sentence.count -= sentence2.count
+
+                if sentence.cells.issubset(sentence2.cells):
+                    sentence2.cells -= sentence.cells
+                    sentence2.count -= sentence.count
 
     def add_knowledge(self, cell, count):
         """
@@ -218,43 +276,15 @@ class MinesweeperAI():
         self.mark_safe(cell)
 
         # sentence => {cells = set [ (0,1), (1,3) ...], count = 1 }
-        self.create_sentence(cell, count)
+        new_sentence = self.create_sentence(cell, count)
+        if new_sentence:
+            self.knowledge.append(new_sentence)
 
-        for sentence in self.knowledge.copy():
-            cells = sentence.cells.copy()
-            # if there's no mine, all cells are safe
-            if sentence.count == 0:
-                for c in cells:
-                    self.mark_safe(c)
-            if len(sentence.cells) == 0:
-                self.knowledge.remove(sentence)
+        self.update_knowledge()
 
-        for sentence in self.knowledge.copy():
-            # if the cell count is equal to mine count, all cells are mines
-            cells = sentence.cells.copy()
-            if sentence.count == len(sentence.cells):
-                for c in cells:
-                    self.mark_mine(c)
-            if len(sentence.cells) == 0:
-                self.knowledge.remove(sentence)
+        self.infer_new_sentence()
 
-        for sentence in self.knowledge:
-            for sentence2 in self.knowledge:
-                if sentence == sentence2:
-                    continue
-
-                if sentence2.cells.issubset(sentence.cells):
-                    sentence.cells -= sentence2.cells
-                    sentence.count -= sentence2.count
-
-                if sentence.cells.issubset(sentence2.cells):
-                    sentence2.cells -= sentence.cells
-                    sentence2.count -= sentence.count
-
-        print("-------------After add knowledge-------------")
-        print(f"Safes: {self.safes}")
-        print(f"Mines: {self.mines}")
-        # raise NotImplementedError
+        self.update_knowledge()
 
     def make_safe_move(self):
         """
@@ -270,22 +300,14 @@ class MinesweeperAI():
                 return move
         return None
 
-
     def make_random_move(self):
-        """
-        Returns a move to make on the Minesweeper board.
-        Should choose randomly among cells that:
-            1) have not already been chosen, and
-            2) are not known to be mines
-        """
+        possible_moves = []
+        for i in range(self.height):
+            for j in range(self.width):
+                if (i, j) not in self.moves_made and (i, j) not in self.mines:
+                    possible_moves.append((i, j))
 
-        x = random.randint(0, self.width - 1)
-        y = random.randint(0, self.height - 1)
+        if len(possible_moves) > 0:
+            return random.choice(possible_moves)
+        return None
 
-        print(self.mines)
-        while (x, y) in self.moves_made or (x, y) in self.mines:
-            print("O movimento já foi feito ou é uma mina!")
-            x = random.randint(0, self.width - 1)
-            y = random.randint(0, self.height - 1)
-
-        return x, y
